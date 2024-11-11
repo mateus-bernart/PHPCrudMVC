@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 declare(strict_types=1);
 
@@ -6,12 +6,15 @@ namespace Alura\Mvc\Controller;
 
 use Alura\Mvc\Entity\Video;
 use Alura\Mvc\Repository\VideoRepository;
+use finfo;
 
-class EditVideoRepository implements Controller{
+class EditVideoController implements Controller
+{
 
     public function __construct(private VideoRepository $videoRepository) {}
 
-    public function processaRequisicao(): void {
+    public function processaRequisicao(): void
+    {
         $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
         if ($id === false && $id === null) {
             header('Location: /?sucesso=0');
@@ -31,6 +34,25 @@ class EditVideoRepository implements Controller{
 
         $video = new Video($url, $titulo);
         $video->setId($id);
+
+        //extrair para uma classe que faz upload de arquivos.
+
+        //transformar nomes para serem mais faceis de identificar pela url (slug - pesquisar)
+
+        if ($_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            //Nome seguro, nome de um arquivo (segurança)
+            $safeFileName = uniqid('upload_') . '_' . pathinfo($_FILES['image']['name'], PATHINFO_BASENAME);
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->file($_FILES['image']['tmp_name']);
+
+            if (str_starts_with($mimeType, 'image/')) {
+                move_uploaded_file(
+                    $_FILES['image']['tmp_name'],
+                    __DIR__ . '/../../public/img/uploads/' . $safeFileName
+                );
+                $video->setFilePath($safeFileName);
+            }
+        }
 
         $success = $this->videoRepository->update($video);
 
