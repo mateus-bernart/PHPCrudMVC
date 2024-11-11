@@ -10,6 +10,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 $dbPath = __DIR__ . '/../banco.sqlite';
 $pdo = new PDO('sqlite:' . $dbPath);
+
 $videoRepository = new VideoRepository($pdo);
 
 $routes = require __DIR__ . '/../config/routes.php';

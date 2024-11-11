@@ -9,9 +9,7 @@ use PDO;
 
 class VideoRepository
 {
-    public function __construct(private PDO $pdo)
-    {
-    }
+    public function __construct(private PDO $pdo){}
 
     public function add(Video $video): bool
     {
@@ -74,9 +72,10 @@ class VideoRepository
 
     private function hydrateVideo(array $videoData): Video
     {
+        //Cria uma nova instância da classe Video usando os dados da consulta.
         $video = new Video($videoData['url'], $videoData['title']);
-        $video->setId($videoData['id']);
+        $video->setId($videoData['id']); //Define id do vídeo
 
-        return $video;
+        return $video; //retorna o objeto Vídeo completo
     }
 }
