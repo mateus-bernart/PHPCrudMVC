@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Alura\Mvc\Controller;
 
 use Alura\Mvc\Repository\VideoRepository;
-use PDO;
 
 class VideoFormController implements Controller{
 
@@ -14,14 +13,13 @@ class VideoFormController implements Controller{
     public function processaRequisicao(): void {
 
         $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+        /**@var ?Video $video    */
         $video = null;
         if ($id !== false && $id !== null) {
             $video = $this->videoRepository->find($id);
         }
 
-         require_once __DIR__ . '../../Views/video-form.php';
+         require_once __DIR__ . '/../../Views/video-form.php';
 
+    }
 }
-}
-
-?>
