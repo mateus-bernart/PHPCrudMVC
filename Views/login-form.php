@@ -1,18 +1,4 @@
-<?php
-        // Verifica se o parâmetro 'sucesso' existe na URL
-        if (isset($_GET['sucesso'])) {
-            $sucesso = $_GET['sucesso'];
-            
-            // Verifica o valor e exibe o alert apropriado
-            if ($sucesso == 1) {
-                echo "<script>alert('Login efetuado com sucesso!');window.location.href='/';</script>";
-            } elseif ($sucesso == 0) {
-                echo "<script>alert('Usuário ou senha inválidos!');window.location.href='/login';</script>";
-            }
-            
-        }
-        
- ?>
+
 <?php require_once __DIR__ . '/inicio-html.php'; ?>
 
     <main class="container">
