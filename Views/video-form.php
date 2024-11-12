@@ -33,7 +33,7 @@ require_once __DIR__ . '/inicio-html.php';
                 id='image' />
         </div>
 
-        <input class="formulario__botao" type="submit" value="Enviar" />
+        <input class="formulario__botao" type="submit" value="Entrar" />
     </form>
 </main>
 
