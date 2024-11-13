@@ -8,25 +8,30 @@ use Alura\Mvc\Entity\Video;
 use Alura\Mvc\Helper\FlashMessageTrait;
 use Alura\Mvc\Repository\VideoRepository;
 use finfo;
+use Nyholm\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
-class NewVideoController implements Controller
+class NewVideoController implements RequestHandlerInterface
 {
     use FlashMessageTrait;
     public function __construct(private VideoRepository $videoRepository) {}
 
-    public function processaRequisicao(): void
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $url = filter_input(INPUT_POST, 'url', FILTER_VALIDATE_URL);
+        $requestBody = $request->getParsedBody();
+        $url = filter_var($requestBody['url'], FILTER_VALIDATE_URL);
+
         if ($url === false) {
             $this->addErrorMessage('Url Inválida');
-            header('Location: /novo-video');
-            return;
+            return new Response(302, ['Location' => '/']);
         }
-        $titulo = filter_input(INPUT_POST, 'titulo');
+
+        $titulo = filter_var($requestBody['titulo']);
         if ($titulo === false) {
             $this->addErrorMessage('Titulo não informado');
-            header('Location: /novo-video');
-            return;
+            return new Response(302, ['Location' => '/']);
         }
 
         $video = new Video($url, $titulo);
@@ -35,15 +40,21 @@ class NewVideoController implements Controller
 
         //transformar nomes para serem mais faceis de identificar pela url (slug - pesquisar)
 
-        if ($_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            //Nome seguro, nome de um arquivo (segurança)
-            $safeFileName = uniqid('upload_') . '_' . pathinfo($_FILES['image']['name'], PATHINFO_BASENAME);
-            $finfo = new finfo(FILEINFO_MIME_TYPE);
-            $mimeType = $finfo->file($_FILES['image']['tmp_name']);
+        $files = $request->getUploadedFiles();
+        /** @var UploadedFileInterface $uploadedImage */
+        $uploadedImage = $files['image'];
 
+
+        if ($uploadedImage->getError() === UPLOAD_ERR_OK) {
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $tmpFile = $uploadedImage->getStream()->getMetadata('uri');
+            $mimeType = $finfo->file($tmpFile);
+
+            
             if (str_starts_with($mimeType, 'image/')) {
-                move_uploaded_file(
-                    $_FILES['image']['tmp_name'],
+                //Nome seguro, nome de um arquivo (segurança)
+                $safeFileName = uniqid('upload_') . '_' . pathinfo($uploadedImage->getClientFilename(), PATHINFO_BASENAME);
+                $uploadedImage->moveTo(
                     __DIR__ . '/../../public/img/uploads/' . $safeFileName
                 );
                 $video->setFilePath($safeFileName);
@@ -54,10 +65,9 @@ class NewVideoController implements Controller
 
         if ($success === false) {
             $this->addErrorMessage('Erro ao cadastrar vídeo');
-            header('Location: /');
-        } else {
-            header('Location: /?sucesso=1');
-            return;
+            return new Response(302, ['Location' => '/novo-video']);
         }
+
+        return new Response(302, ['Location' => '/']);
     }
 }

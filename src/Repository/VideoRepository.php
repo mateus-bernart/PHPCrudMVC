@@ -9,8 +9,13 @@ use PDO;
 
 class VideoRepository
 {
-    public function __construct(private PDO $pdo){}
+    public function __construct(private PDO $pdo) {}
 
+    /// Adds a video to the database
+    ///
+    /// @param Video $video The video to be added
+    ///
+    /// @return bool True if the video was added successfully, false otherwise
     public function add(Video $video): bool
     {
         $sql = 'INSERT INTO videos (url, title, image_path) VALUES (?, ?, ?)';
@@ -55,8 +60,8 @@ class VideoRepository
         $statement->bindValue(':url', $video->url);
         $statement->bindValue(':title', $video->title);
         $statement->bindValue(':id', $video->id, PDO::PARAM_INT);
-        
-        if ($video->getFilePath() !== null){
+
+        if ($video->getFilePath() !== null) {
             $statement->bindValue(':image_path', $video->getFilePath());
         }
 
@@ -76,6 +81,7 @@ class VideoRepository
             $videoList
         );
     }
+
 
     public function find(int $id)
     {
