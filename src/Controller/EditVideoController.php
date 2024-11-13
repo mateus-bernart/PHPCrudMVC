@@ -16,13 +16,25 @@ use Psr\Http\Server\RequestHandlerInterface;
 class EditVideoController implements RequestHandlerInterface
 {
 
+    use FlashMessageTrait;
     public function __construct(private VideoRepository $videoRepository) {}
 
-    use FlashMessageTrait;
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $requestBody = $request->getParsedBody();
+
+        $queryParams = $request->getQueryParams(); // GET
+
+        $id = filter_var($queryParams['id'], FILTER_VALIDATE_INT);
+
+        if ($id === false || $id === null) {
+            $this->addErrorMessage('Id inválido');
+            return new Response(302, ['Location' => '/']);
+        }
+
+        $requestBody = $request->getParsedBody(); //POST
+
         $url = filter_var($requestBody['url'], FILTER_VALIDATE_URL);
+
         if ($url === false) {
             $this->addErrorMessage('URL Inválida.');
             return new Response(302, ['Location' => '/']);
@@ -38,9 +50,9 @@ class EditVideoController implements RequestHandlerInterface
         //transformar nomes para serem mais faceis de identificar pela url (slug - pesquisar)
 
         $video = new Video($url, $titulo);
-
+        $video->setId($id);
         $files = $request->getUploadedFiles();
-        
+
         /** @var UploadedFileInterface $uploadedImage */
         $uploadedImage = $files['image'];
 
@@ -48,7 +60,7 @@ class EditVideoController implements RequestHandlerInterface
             $finfo = new finfo(FILEINFO_MIME_TYPE);
             $tmpFile = $uploadedImage->getStream()->getMetadata('uri');
             $mimeType = $finfo->file($tmpFile);
-            
+
             if (str_starts_with($mimeType, 'image/')) {
                 //Nome seguro, nome de um arquivo (segurança)
                 $safeFileName = uniqid('upload_') . '_' . pathinfo($uploadedImage->getClientFilename(), PATHINFO_FILENAME);

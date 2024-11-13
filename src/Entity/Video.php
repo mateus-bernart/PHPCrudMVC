@@ -31,12 +31,13 @@ class Video
         $this->id = $id;
     }
 
-    public function setFilePath(string $filePath): void {
+    public function setFilePath(string $filePath): void
+    {
         $this->filePath = $filePath;
     }
 
-    public function getFilePath(): ?string {
+    public function getFilePath(): ?string
+    {
         return $this->filePath;
     }
-
 }

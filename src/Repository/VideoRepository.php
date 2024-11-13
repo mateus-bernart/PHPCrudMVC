@@ -56,9 +56,9 @@ class VideoRepository
         $updateImageSql WHERE id = :id;";
 
         $statement = $this->pdo->prepare($sql);
-
         $statement->bindValue(':url', $video->url);
         $statement->bindValue(':title', $video->title);
+
         $statement->bindValue(':id', $video->id, PDO::PARAM_INT);
 
         if ($video->getFilePath() !== null) {
